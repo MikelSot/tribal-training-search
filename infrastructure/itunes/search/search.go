@@ -39,6 +39,10 @@ func (s Search) Search(ctx context.Context, search model.Search) (model.ItunesRe
 		return model.ItunesResult{}, fmt.Errorf("search.url.Parse(): %w", err)
 	}
 
+	if search.Entity == model.Artist {
+		search.Entity = model.MusicArtist
+	}
+
 	params := url.Values{}
 	params.Add(_paramTerm, search.Search)
 	params.Add(_paramEntity, string(search.Entity))

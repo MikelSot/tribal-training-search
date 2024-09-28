@@ -20,6 +20,6 @@ type ChartLyricsService interface {
 }
 
 type RedisService interface {
-	Set(key string, value interface{}, expiration time.Duration) error
-	Get(key string) (string, error)
+	Set(ctx context.Context, key string, value interface{}, exp time.Duration) error
+	Get(ctx context.Context, key string) (string, error)
 }

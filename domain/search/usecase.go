@@ -19,10 +19,11 @@ type Search struct {
 	redis       RedisService
 }
 
-func New(itunes ItunesService, chartLyrics ChartLyricsService) Search {
+func New(itunes ItunesService, chartLyrics ChartLyricsService, redis RedisService) Search {
 	return Search{
 		itunes:      itunes,
 		chartLyrics: chartLyrics,
+		redis:       redis,
 	}
 }
 
@@ -33,7 +34,7 @@ func (s Search) Search(ctx context.Context, searches model.SearchMap) (model.Res
 		return nil, fmt.Errorf("search.Search(): searches is empty")
 	}
 
-	results, err := s.getDataFromCache(cacheKey)
+	results, err := s.getDataFromCache(ctx, cacheKey)
 	if err == nil {
 		return results, nil
 	}
@@ -59,7 +60,7 @@ func (s Search) Search(ctx context.Context, searches model.SearchMap) (model.Res
 
 	results = s.makeResults(itunesResultMap, chartLyricsResult)
 
-	if err = s.redis.Set(cacheKey, results, time.Hour*24); err != nil {
+	if err = s.redis.Set(ctx, cacheKey, results, time.Hour*24); err != nil {
 		log.Warn("search.Search(): error saving results in cache")
 	}
 
@@ -170,10 +171,10 @@ func (s Search) makeResults(itunes map[int]model.ItunesResponse, chartLyrics mod
 	return results
 }
 
-func (s Search) getDataFromCache(key string) (model.Results, error) {
+func (s Search) getDataFromCache(ctx context.Context, key string) (model.Results, error) {
 	var results model.Results
 
-	cacheResults, err := s.redis.Get(key)
+	cacheResults, err := s.redis.Get(ctx, key)
 	if err != nil {
 		return nil, fmt.Errorf("search.getDataFromCache(): %w", err)
 	}

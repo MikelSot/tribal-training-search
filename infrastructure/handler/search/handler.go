@@ -16,10 +16,9 @@ func newHandler(useCase search.UseCase) handler {
 
 func (h handler) Search(ctx *fiber.Ctx) error {
 	searchMap := model.SearchMap{
-		model.Artist:      model.Search{Search: ctx.Params("artist")},
-		model.Song:        model.Search{Search: ctx.Params("song")},
-		model.Album:       model.Search{Search: ctx.Params("album")},
-		model.MusicArtist: model.Search{Search: ctx.Params("artist")},
+		model.Artist: model.Search{Search: ctx.Query("artist")},
+		model.Song:   model.Search{Search: ctx.Query("song")},
+		model.Album:  model.Search{Search: ctx.Query("album")},
 	}
 
 	result, err := h.useCase.Search(ctx.Context(), searchMap)
