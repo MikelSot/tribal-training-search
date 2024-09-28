@@ -72,22 +72,29 @@ func (s Search) getSongsFromItunes(ctx context.Context, searches model.SearchMap
 	errorsCh := make(chan error, len(searches))
 
 	var wg sync.WaitGroup
+	var mx sync.Mutex
 
 	for _, search := range searches {
 		wg.Add(1)
 
-		go func(model.Search, context.Context, *sync.WaitGroup) {
+		go func(search model.Search, wg *sync.WaitGroup, mx *sync.Mutex) {
 			defer wg.Done()
+
+			ctx = context.Background()
 
 			itunesResult, err := s.itunes.Search(ctx, search)
 			if err != nil {
+				mx.Lock()
 				errorsCh <- fmt.Errorf("%w", err)
+				mx.Unlock()
 
 				return
 			}
 
+			mx.Lock()
 			resultItunesCh <- itunesResult
-		}(search, ctx, &wg)
+			mx.Unlock()
+		}(search, &wg, &mx)
 	}
 
 	wg.Wait()
