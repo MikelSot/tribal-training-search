@@ -2,6 +2,7 @@ package search
 
 import (
 	"github.com/MikelSot/tribal-training-search/domain/search"
+	"github.com/MikelSot/tribal-training-search/model"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -14,13 +15,14 @@ func newHandler(useCase search.UseCase) handler {
 }
 
 func (h handler) Search(ctx *fiber.Ctx) error {
-	param := ctx.Params("search")
-
-	if param == "" {
-		return ctx.Status(fiber.StatusBadRequest).JSON("search param is required")
+	searchMap := model.SearchMap{
+		model.Artist:      model.Search{Search: ctx.Params("artist")},
+		model.Song:        model.Search{Search: ctx.Params("song")},
+		model.Album:       model.Search{Search: ctx.Params("album")},
+		model.MusicArtist: model.Search{Search: ctx.Params("artist")},
 	}
 
-	result, err := h.useCase.Search(ctx.Context(), param)
+	result, err := h.useCase.Search(ctx.Context(), searchMap)
 	if err != nil {
 		return ctx.Status(fiber.StatusInternalServerError).JSON(err.Error())
 	}

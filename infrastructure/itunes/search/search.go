@@ -21,7 +21,8 @@ const (
 	_paramTerm  = "term"
 	_paramMedia = "media"
 
-	_Media = "music"
+	_paramEntity = "entity"
+	_Media       = "music"
 )
 
 type Search struct {
@@ -32,14 +33,15 @@ func New(config model.Config) Search {
 	return Search{config}
 }
 
-func (s Search) Search(ctx context.Context, search string) (model.ItunesResult, error) {
+func (s Search) Search(ctx context.Context, search model.Search) (model.ItunesResult, error) {
 	itunesUrl, err := url.Parse(s.config.ItunesUrl)
 	if err != nil {
 		return model.ItunesResult{}, fmt.Errorf("search.url.Parse(): %w", err)
 	}
 
 	params := url.Values{}
-	params.Add(_paramTerm, search)
+	params.Add(_paramTerm, search.Search)
+	params.Add(_paramEntity, string(search.Entity))
 	params.Add(_paramMedia, _Media)
 	itunesUrl.RawQuery = params.Encode()
 

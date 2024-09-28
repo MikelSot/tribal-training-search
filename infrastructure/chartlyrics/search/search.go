@@ -12,11 +12,6 @@ import (
 	"github.com/MikelSot/tribal-training-search/model"
 )
 
-const (
-	_paramArtist = "artist"
-	_paramSong   = "song"
-)
-
 type Search struct {
 	config model.Config
 }
@@ -25,15 +20,15 @@ func New(config model.Config) Search {
 	return Search{config}
 }
 
-func (s Search) Search(ctx context.Context, search string) (model.ChartLyricsResult, error) {
+func (s Search) Search(ctx context.Context, search model.SearchMap) (model.ChartLyricsResult, error) {
 	chartLyricsUrl, err := url.Parse(s.config.ChartLyricsUrl)
 	if err != nil {
 		return model.ChartLyricsResult{}, fmt.Errorf("search.url.Parse(): %w", err)
 	}
 
 	params := url.Values{}
-	params.Add(_paramArtist, search)
-	params.Add(_paramSong, search)
+	params.Add(string(model.Artist), search[model.Artist].Search)
+	params.Add(string(model.Song), search[model.Song].Search)
 	chartLyricsUrl.RawQuery = params.Encode()
 
 	body, err := s.doRequest(ctx, chartLyricsUrl.String())
